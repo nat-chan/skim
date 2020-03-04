@@ -319,8 +319,7 @@ function! skim#wrap(...)
       call mkdir(dir, 'p')
     endif
     let history = skim#shellescape(dir.'/'.name)
-    let cmd_history = skim#shellescape(dir.'/cmd-'.name)
-    let opts.options = join(['--history', history, '--cmd-history', cmd_history, opts.options])
+    let opts.options = join(['--history', history, opts.options])
   endif
 
   " Action: g:skim_action
@@ -408,7 +407,8 @@ try
   elseif use_term
     let optstr .= ' --no-height'
   endif
-  let command = prefix.(use_tmux ? s:skim_tmux(dict) : skim_exec).' '.optstr.' > '.temps.result
+"  let command = prefix.(use_tmux ? s:skim_tmux(dict) : skim_exec).' '.optstr.' > '.temps.result
+  let command = prefix.(use_tmux ? s:skim_tmux(dict) : skim_exec).' '.optstr.'| awk "{print $2}" > '.temps.result
 
   if use_term
     return s:execute_term(dict, command, temps)
@@ -760,7 +760,7 @@ function! s:callback(dict, lines) abort
         endif
       endfor
     endif
-    if has_key(a:dict, 'sink*')
+    if has_key(a:dict, 'sink*') && len(a:lines) != 0
       call a:dict['sink*'](a:lines)
     endif
   catch
